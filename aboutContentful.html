@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <link href="kendo/styles/kendo.common.min.css" rel="stylesheet" />
+    <link href="kendo/styles/kendo.default.min.css" rel="stylesheet" />
+    <script src="kendo/js/jquery.min.js"></script>
+    <script src="kendo/js/kendo.mobile.min.js"></script>
+
+
+    <style scoped>
+        #tiles {
+            padding: 10px;
+            margin-bottom: -1px;
+            min-width: 555px;
+            height: 510px;
+            overflow: auto;
+        }
+        .tile {
+            float: left;
+            position: relative;
+            width: 221px;
+            height: 260px;
+            margin: 0;
+            padding: 0;
+        }
+        .tile img {
+            width: 220px;
+            height: 220px;
+        }
+        body {
+            margin: 5px;
+            padding: 5px;
+            font-family: Arial;
+            font-size: 0.8em;
+            color: #636466;
+        }
+        .aboutUsTitle {
+            font-size: 2.45em;
+            color: #b23427;
+            font-family: Georgia,'Palatino Linotype','Times New Roman',Times,serif;
+            font-weight: normal;
+        }
+        .aboutUsHeader {
+            font-size: 1.6em;
+            color: #A89E6C;
+            font-family: Georgia,'Palatino Linotype','Times New Roman',Times,serif;
+            font-weight: normal;
+            line-height: normal;
+        }
+        .aboutUs {
+            overflow: auto;
+            position: absolute;
+            top: 150px;
+            width: 45%;
+            height: 205px;
+        }
+        .aboutUsImg {
+            padding: 0;
+            margin-left: 47%;
+        }
+        .aboutUsBrochures{
+            font-family: Arial;
+            font-weight: bold;
+            margin-top: 20px;
+            width: 50%;
+        }
+        .tile h3 {
+            margin: 0;
+            padding: 3px 5px 0 0;
+            max-width: 196px;
+            overflow: hidden;
+            line-height: 1.1em;
+            font-size: .9em;
+            font-weight: normal;
+            text-transform: uppercase;
+            color: #999;
+        }
+        .tile p {
+            visibility: hidden;
+        }
+        .tile:hover p {
+            visibility: visible;
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            top: 0;
+            margin: 0;
+            padding: 0;
+            line-height: 220px;
+            vertical-align: middle;
+            text-align: center;
+            color: #fff;
+            background-color: rgba(0,0,0,0.75);
+            transition: background .2s linear, color .2s linear;
+            -moz-transition: background .2s linear, color .2s linear;
+            -webkit-transition: background .2s linear, color .2s linear;
+            -o-transition: background .2s linear, color .2s linear;
+        }
+        .k-listview:after {
+            content: ".";
+            display: block;
+            height: 0;
+            clear: both;
+            visibility: hidden;
+        }
+    </style>
+
+</head>
+<body>
+
+<div id="example" class="k-content">
+
+    <div id="about"></div>
+
+
+
+    <script id="template" type="text/x-kendo-template">
+
+        <div class="aboutUsTitle">
+            <p>#= title #</p>
+        </div>
+        <div class="aboutUsHeader">
+            <p><em>#= heading #</em></p>
+        </div>
+        <div class="aboutUs">
+            <p>#= body #</p>
+        </div>
+        <div class="aboutUsImg">
+            <img src="#= GetUrl() #" height="205"/>
+        </div>
+        <div class="aboutUsBrochures">
+            <p>Attached Brochures...</p>
+            <p>#= GetBrochureUrl() #</p>
+        </div>
+
+
+
+
+
+    </script>
+
+    <script>
+
+        $(document).ready(function() {
+
+            function onChange() {
+                $("#about").html(kendo.render(template, this.view()));
+            }
+
+            function onError() {
+               // kendoConsole.log('An error');
+            }
+
+           // kendoConsole.log('Init');
+
+            var template  = kendo.template($("#template").html());
+
+            var space = "zpp0viuq4x1e";
+            var contentType = "6hQLWC6YmI2Iw4cKES8moU";
+            var authorisation = "Bearer 31d5775c68437c57df39ebdde118dff797e89a545408ccb981abdb2908e79b60";
+
+            var url = "https://cdn.contentful.com/spaces/" + space + "/entries";
+
+           // kendoConsole.log(url);
+
+            var assetDS = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: url,
+                        beforeSend: function(xhr) {
+                            xhr.setRequestHeader('Authorization', authorisation),
+                                    xhr.setRequestHeader('Content-Type','application/json')
+                        },
+                        dataType: "json",
+                        data: {
+                            content_type: contentType
+                        }
+                    }
+                },
+                // filter: { field: "fields.image2", operator: "neq", value: "" },
+                schema: {
+                    data: "includes.Asset",
+                    type: "json",
+                    model: {
+                        fields: {
+                            imageId: "sys.id",
+                            imageUrl: "fields.file.url",
+                            typeId: "fields.file.contentType",
+                            pdfId: "sys.id",
+                            pdfTitle: "fields.title",
+                            pdfUrl: "fields.file.url"
+                        }
+                    }
+                },
+                error: function(e) {
+                   // kendoConsole.log(e.xhr.responseText);
+                }
+            });
+
+//            var pdfDS = new kendo.data.DataSource({
+//                transport: {
+//                    read: {
+//                        url: url,
+//                        beforeSend: function(xhr) {
+//                            xhr.setRequestHeader('Authorization', authorisation),
+//                                    xhr.setRequestHeader('Content-Type','application/json')
+//                        },
+//                        dataType: "json",
+//                        data: {
+//                            content_type: contentType
+//                        }
+//                    }
+//                },
+//                schema: {
+//                    data: "items.fields",
+//                    type: "json",
+//                    model: {
+//                        fields: {
+//                            pdfId: "sys.id"
+//                        }
+//                    }
+//
+//                },
+//                error: function(e) {
+//                    //  kendoConsole.log(e.xhr.responseText);
+//                }
+//            });
+
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: url,
+                        beforeSend: function(xhr) {
+                            xhr.setRequestHeader('Authorization', authorisation),
+                                    xhr.setRequestHeader('Content-Type','application/json')
+                        },
+                        dataType: "json",
+                        data: {
+                            content_type: contentType
+                        }
+                    }
+                },
+                schema: {
+                    data: "items",
+                    type: "json",
+                    model: {
+                        fields: {
+                            title: "fields.name",
+                            imageId: "fields.image.sys.id",
+                            heading: "fields.heading",
+                            body: "fields.body"
+                            //brochureId: "fields.documentFiles"
+                        },
+                        GetUrl: function () {
+
+                            var data = assetDS.data();
+                            var arrayLength = data.length;
+                            var assetId = this.get('fields.image.sys.id');
+
+                            for (var i = 0; i < arrayLength; i++) {
+                                var asset = assetDS.at(i);
+                                if (asset.imageId == assetId)
+                                    return asset.imageUrl;
+                            }
+                        },
+                        GetBrochureUrl: function () {
+
+                            var data = assetDS.data();
+                            var arrayLength = data.length;
+                            var assetId = this.get('fields.image.sys.id');
+                            var goblin = ""
+
+                            for (var i = 0; i < arrayLength; i++) {
+                                var asset = assetDS.at(i);
+                                if (asset.typeId == "application/pdf")
+                                goblin = goblin + "<a href=http:" + asset.pdfUrl + ">" + asset.pdfTitle + "</a>" + "<br>";
+                            }
+                            return goblin;
+                        }
+                    }
+                },
+                requestStart: function() {
+                    kendo.ui.progress($("#tiles"), true);
+                },
+                requestEnd: function() {
+                    kendo.ui.progress($("#tiles"), false);
+                },
+                error: function(e) {
+                  //  kendoConsole.log(e.xhr.responseText);
+                },
+                change: onChange
+            });
+
+
+
+            assetDS.fetch(function(){
+                var data = assetDS.data();
+                console.log('Asset fetch ' + assetDS.data.length);
+//                pdfDS.fetch(function(){
+//                    console.log('pdfDS fetch ' + pdfDS.data.length);
+//                });
+                dataSource.fetch(function() {
+                  console.log('Datasource fetch ' + dataSource.data.length);
+                });
+            });
+        });
+
+    </script>
+</div>
+
+<br>
+
+</body>
+</html>
